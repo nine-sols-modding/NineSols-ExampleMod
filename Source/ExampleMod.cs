@@ -1,7 +1,9 @@
-﻿using BepInEx;
+﻿using System.Collections.Generic;
+using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using NineSolsAPI;
+using NineSolsAPI.Preload;
 using UnityEngine;
 
 namespace ExampleMod;
@@ -15,9 +17,29 @@ public class ExampleMod : BaseUnityPlugin {
 
     private Harmony harmony = null!;
 
+    private List<GameObject?> preloadedObjects = [];
+
+    private class Preloads {
+        [Preload("A1_S1_HumanDisposal_Final",
+            "A1_S1_GameLevel/Room/A1_S1_Tutorial_Logic/StealthGameMonster_Minion_Tutorial1")]
+        private GameObject? preloadedObject;
+    }
+
+    private Preloads preloads = new();
+
     private void Awake() {
         Log.Init(Logger);
         RCGLifeCycle.DontDestroyForever(gameObject);
+
+        NineSolsAPICore.Preloader.AddPreloadClass(preloads);
+
+        NineSolsAPICore.Preloader.AddPreloadList(
+            [
+                ("A1_S1_HumanDisposal_Final",
+                    "A1_S1_GameLevel/Room/A1_S1_Tutorial_Logic/StealthGameMonster_Minion_Tutorial1"),
+            ],
+            preloadedObjects
+        );
 
         // Load patches from any class annotated with @HarmonyPatch
         harmony = Harmony.CreateAndPatchAll(typeof(ExampleMod).Assembly);
