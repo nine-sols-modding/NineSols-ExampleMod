@@ -23,8 +23,10 @@ public class ExampleMod : BaseUnityPlugin {
         harmony = Harmony.CreateAndPatchAll(typeof(ExampleMod).Assembly);
 
         enableSomethingConfig = Config.Bind("General.Something", "Enable", true, "Enable the thing");
-        somethingKeyboardShortcut = Config.Bind("General.Something", "Shortcut",
-            new KeyboardShortcut(KeyCode.H, KeyCode.LeftControl), "Shortcut to execute");
+        somethingKeyboardShortcut = Config.Bind("General.Something",
+            "Shortcut",
+            new KeyboardShortcut(KeyCode.H, KeyCode.LeftControl),
+            "Shortcut to execute");
 
         // Usage of the modding API is entirely optional.
         // It provides utilities like the KeybindManager, utilities for Instantiating objects including the 
@@ -45,6 +47,7 @@ public class ExampleMod : BaseUnityPlugin {
 
     private void TestMethod() {
         if (!enableSomethingConfig.Value) return;
+
         ToastManager.Toast("Shortcut activated");
         Log.Info("Log messages will only show up in the logging console and LogOutput.txt");
 
