@@ -1,7 +1,7 @@
-game := "C:/Program Files (x86)/Steam/steamapps/common/Nine Sols-Speedrunpatch/NineSols_Data"
+game := "C:/Users/Jakob/Documents/dev/contrib/RustyAssetBundleEXtractor/out"
 
 examplemod:
     uvx unity-scene-repacker \
-        --game-dir "{{game}}" \
-        --objects Resources/bundle.objects.json \
-        --output Resources/bundle.unity3d
+        --steam-game "Hollow Knight" \
+        --objects Resources/bundle.objects.jsonc \
+        --output Resources/bundle.unity3d --bundle-name examplemod
