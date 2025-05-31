@@ -1,9 +1,14 @@
-﻿using BepInEx;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using NineSolsAPI;
 using NineSolsAPI.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ExampleMod;
 
@@ -36,6 +41,7 @@ public class ExampleMod : BaseUnityPlugin {
         // thunderstore.toml.
 
         KeybindManager.Add(this, TestMethod, () => somethingKeyboardShortcut.Value);
+        KeybindManager.Add(this, LoadAssetBundle, KeyCode.T);
 
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
     }
@@ -52,6 +58,55 @@ public class ExampleMod : BaseUnityPlugin {
         var hasHat = Player.i.GetFieldValue<bool>("_hasHat"); // gets the field via reflection
         Player.i.SetHasHat(!hasHat);
     }
+
+    private void LoadAssetBundle() {
+        // The bundle is defined in the .csproj as <EmbeddedResource />
+        var assetBundle = AssemblyUtils.GetEmbeddedAssetBundle("ExampleMod.preloads.bundle");
+        // In a real mod you probably want to load the assetbundle once when you want to use it,
+        // and keep the spawned scene in memory if they're not too big.
+        // There's a bunch of optimizations you can figure out here.
+        if (assetBundle == null) {
+            ToastManager.Toast("Failed to load AssetBundle");
+            return;
+        }
+
+        StartCoroutine(SpawnEnemies(assetBundle));
+    }
+
+    // Loads all the scenes contained in the AssetBundle, and spawn copies of their objects
+    private static IEnumerator SpawnEnemies(AssetBundle bundle) {
+        var sceneNames = bundle.GetAllScenePaths()
+            .Select(Path.GetFileNameWithoutExtension)
+            .ToList();
+
+        var start = Time.time;
+        var ops = sceneNames
+            .Select(sceneName => SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive))
+            .ToList();
+        foreach (var op in ops) yield return op;
+
+        Log.Info($"Loading took {Time.time - start}s");
+        bundle.Unload(false);
+
+        try {
+            List<GameObject> bosses = [];
+            foreach (var prefab in sceneNames.Select(SceneManager.GetSceneByName)
+                         .SelectMany(scene => scene.GetRootGameObjects())) {
+                ToastManager.Toast($"Spawning {prefab.name}");
+                var instantiation = ObjectUtils.InstantiateInit(prefab);
+                instantiation.SetActive(true);
+                instantiation.transform.position = Player.i.transform.position;
+                bosses.Add(instantiation);
+            }
+
+            yield return new WaitForSeconds(20);
+
+            bosses.ForEach(Destroy);
+        } finally {
+            sceneNames.ForEach(sceneName => SceneManager.UnloadSceneAsync(sceneName));
+        }
+    }
+
 
     private void OnDestroy() {
         // Make sure to clean up resources here to support hot reloading
