@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using HarmonyLib;
 using NineSolsAPI;
+using NineSolsAPI.Utils;
 using UnityEngine;
 
 namespace ExampleMod;
@@ -39,22 +40,16 @@ public class ExampleMod : BaseUnityPlugin {
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
     }
 
-    // Some fields are private and need to be accessed via reflection.
-    // You can do this with `typeof(Player).GetField("_hasHat", BindingFlags.Instance|BindingFlags.NonPublic).GetValue(Player.i)`
-    // or using harmony access tools:
-    private static readonly AccessTools.FieldRef<Player, bool>
-        PlayerHasHat = AccessTools.FieldRefAccess<Player, bool>("_hasHat");
-
     private void TestMethod() {
         if (!enableSomethingConfig.Value) return;
 
         ToastManager.Toast("Shortcut activated");
         Log.Info("Log messages will only show up in the logging console and LogOutput.txt");
 
-        // Sometimes variables aren't set in the title screen. Make sure to check for null to prevent crashes.
-        if (Player.i == null) return;
+        // Sometimes variables aren't present in the title screen. Make sure to check for null to prevent crashes.
+        if (!Player.i) return;
 
-        var hasHat = PlayerHasHat.Invoke(Player.i);
+        var hasHat = Player.i.GetFieldValue<bool>("_hasHat"); // gets the field via reflection
         Player.i.SetHasHat(!hasHat);
     }
 
