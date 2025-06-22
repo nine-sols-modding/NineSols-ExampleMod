@@ -60,6 +60,10 @@ public class ExampleMod : BaseUnityPlugin {
     }
 
     private void LoadAssetBundle() {
+        // const string path = "/home/jakob/dev/unity/RustyAssetBundleEXtractor/out.test";
+        // var allBytes = File.ReadAllBytes(path);
+        // var assetBundle = AssetBundle.LoadFromMemory(allBytes);
+
         // The bundle is defined in the .csproj as <EmbeddedResource />
         var assetBundle = AssemblyUtils.GetEmbeddedAssetBundle("ExampleMod.preloads.bundle");
         // In a real mod you probably want to load the assetbundle once when you want to use it,

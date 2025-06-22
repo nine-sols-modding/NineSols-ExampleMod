@@ -39,6 +39,7 @@
 
     <ItemGroup>
         <EmbeddedResource Include="../Resources/bundle.unity3d" />
+        <Content Include="../Resources/bundle.objects.jsonc" />
     </ItemGroup>
 
     <ItemGroup>

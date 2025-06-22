@@ -1,7 +1,5 @@
-game := "C:/Program Files (x86)/Steam/steamapps/common/Nine Sols-Speedrunpatch/NineSols_Data"
-
 examplemod:
     uvx unity-scene-repacker \
-        --game-dir "{{game}}" \
-        --objects Resources/bundle.objects.json \
+        --steam-game "Nine Sols" \
+        --objects Resources/bundle.objects.jsonc \
         --output Resources/bundle.unity3d
